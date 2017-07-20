@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 
+"""
+test module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+As get_verify_code() uses service on my Tencent Cloud Server and
+travis-ci can not access the api(timout exception),So the test
+always failed.
+"""
+
 from hfut_brush.bru import Brush
 import os
 
