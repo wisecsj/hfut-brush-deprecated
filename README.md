@@ -5,3 +5,15 @@
 [![License](https://img.shields.io/pypi/l/hfut_brush.svg)](https://pypi.python.org/pypi/hfut_brush/)
 
 HFUT online-exams auto-complete
+
+(As get_verify_code() uses service on my Tencent Cloud Server and
+travis-ci can not access the api(timout exception),So the test
+always failed.)
+
+# Installation
+
+Simply:`pip install hfut_brush`
+
+# Usage
+
+Just type **brush** in the CMD or shell
