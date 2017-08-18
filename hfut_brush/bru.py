@@ -154,7 +154,7 @@ class Brush:
 
     def submit(self, ans, id, id2, id3, id4, index, retries=2):
         """submit the answer found in Excel to server"""
-        dx = ["false", "false", "false", "false", "false"]
+        dx = ["false"] * 4
         try:
             if ans.find('A') != -1:
                 dx[0] = "true"
