@@ -142,6 +142,7 @@ class Brush:
             b = self.ses.post(url, headers=self.headers)
             b.encoding = 'utf-8'
             d = b.text
+            #print(b.content)
             title = re.findall(r'&nbsp;(.*?)","', d, re.S)[0]
             return title
         except Exception as e:
@@ -154,7 +155,7 @@ class Brush:
 
     def submit(self, ans, id, id2, id3, id4, index, retries=2):
         """submit the answer found in Excel to server"""
-        dx = ["false"] * 4
+        dx = ["false", "false", "false", "false", "false"]
         try:
             if ans.find('A') != -1:
                 dx[0] = "true"
@@ -183,19 +184,19 @@ class Brush:
                      "DuoXanswerD": dx[3],
                      "DuoXanswerE": dx[4],
                      "DuoXanswer": ans}  # 部分题库的多选是分成5个来提交，还有的是只用一个进行提交
-            body = ses.post(save_url, data=data2, headers=headers)
+            body = self.ses.post(self.save_url, data=data2, headers=self.headers)
             wb_data = body.text
             print(wb_data, index)
         except Exception as e:
             print(e)
             if retries > 0:
-                return submit(ans, id, id2, id3, id4, index, retries=retries - 1)
+                return self.submit(ans, id, id2, id3, id4, index, retries=retries - 1)
             else:
                 print("get failed", index)
                 return ''
 
     def scan_excel(self):
-        f = xlrd.open_workbook('exercise.xls')
+        f = xlrd.open_workbook('D:\\exercise.xls')
         sheets_num = len(f.sheets())
 
         # 读取XLS中的题目和答案，存进字典
@@ -211,26 +212,28 @@ class Brush:
                     answer = xls.cell(i, 2).value
                 else:
                     answer = xls.cell(i, 7).value
-                self.result[title] = answer
+                self.answers_dict[title] = answer
 
     def get_submit_info(self):
         pass
 
     def main(self):
         """main logic"""
+        self.scan_excel()
         start_url = input("请输入测试页面URL\n")
 
         body = self.ses.get(start_url, headers=self.headers)
         body.encoding = 'utf-8'
         wb_data = body.text
         # print(wb_data)
-        urlId = re.findall(r'do\?(.*?)&method', self.start_url, re.S)[0]
+        urlId = re.findall(r'do\?(.*?)&method', start_url, re.S)[0]
 
         eval = re.findall(r'eval(.*?)]\);', wb_data, re.S)[0]
 
         bs = BeautifulSoup(wb_data, 'lxml')
         val = bs.form.input
         examReplyId = val['value']
+        #print(examReplyId)
 
         examId = re.findall(r'<input type="hidden" name="examId" id="examId" value="(.*?)" />',
                             wb_data, re.S)[0]
@@ -246,12 +249,12 @@ class Brush:
 
         # id对应exerciseID,id2对应examStudetExerciseId
         for id in exerciseId:
-            next_url = r"http://tkkc.hfut.edu.cn/student/exam/manageExam.do?%s&method=getExerciseInfo&examReplyId=%s&\
-                    exerciseId=%s&examStudentExerciseId=%d" % (
+            next_url = r"http://tkkc.hfut.edu.cn/student/exam/manageExam.do?%s&method=getExerciseInfo&examReplyId=%s&exerciseId=%s&examStudentExerciseId=%d" % (
                 urlId, examReplyId, id, examStudentExerciseId)
             title = self.craw(next_url)
-            ans = self.answers_dict.get[title, 'Not found']
-            self.submit(ans, id, examStudentExerciseId, examReplyId, examId, index)
+            #print(self.answers_dict,title)
+            ans = self.answers_dict.get(title, 'Not found')
+            self.submit(ans, id, examStudentExerciseId, examReplyId, examId, self.index)
             # time.sleep(1)
             self.index += 1
             examStudentExerciseId = examStudentExerciseId + 1
